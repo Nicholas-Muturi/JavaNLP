@@ -1,0 +1,99 @@
+private void referenceCode(){
+        Scanner scanner = new Scanner(System.in);
+        Properties props = new Properties();
+        props.setProperty("annotators","tokenize, ssplit, pos, lemma, ner, parse, depparse, coref, sentiment");
+
+        StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+        System.out.println("Say Anything...");
+        String userInput = scanner.nextLine();
+
+        CoreDocument document = new CoreDocument(userInput);
+        pipeline.annotate(document);
+        List<CoreLabel> tokens = document.tokens();
+        List<CoreSentence> sentenceList = document.sentences();
+
+        *//*  Tokenize  *//*
+        System.out.println("\n");
+        System.out.println("--- Tokenization ---");
+        for (CoreLabel token:tokens) {
+            System.out.println(token.word());
+        }
+
+        *//*  ssplit  *//*
+        System.out.println("\n");
+        System.out.println("--- Ssplit (sentences)  ---");
+        System.out.println("Number of sentences: "+sentenceList.size());
+        for(int i = 0; i < sentenceList.size(); i++){
+            System.out.println((i+1) +": "+sentenceList.get(i));
+        }
+
+        *//*  pos  *//*
+        System.out.println("\n");
+        System.out.println("--- POS (parts of speech) ---");
+        //as a sentence
+        *//*for(CoreSentence sentence : sentenceList){
+            System.out.println(sentence + " -> "+ sentence.posTags());
+        }*//*
+
+        //word by word
+        for (CoreLabel token:tokens) {
+            String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+            System.out.println(token.word() + " : "+ pos);
+        }
+
+        *//*  lemmatization  *//*
+        System.out.println("\n");
+        System.out.println("--- Lemmatization ---");
+        for(CoreLabel token:tokens){
+            String lemma = token.get(CoreAnnotations.LemmaAnnotation.class);
+            System.out.println(token.word() + " : "+ lemma);
+        }
+
+        *//*  Name-Entity relationship  *//*
+        System.out.println("\n");
+        System.out.println("--- NER ---");
+        //as a sentence
+        for(CoreSentence sentence : sentenceList){
+            System.out.println(sentence + " -> "+ sentence.nerTags());
+        }
+        //word by word
+        for (CoreLabel token:tokens) {
+            String ner = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+            System.out.println(token.word() + " : "+ ner);
+        }
+
+        *//*  sentiment  *//*
+        System.out.println("\n");
+        System.out.println("--- Sentiment ---");
+        for (CoreSentence sentence : sentenceList) {
+            System.out.println(sentence +" : " + sentence.sentiment());
+        }
+
+        *//*  coref  *//*
+        System.out.println("\n");
+        System.out.println("--- Coreference ---");
+        Annotation annotationDoc = new Annotation(userInput);
+        pipeline.annotate(annotationDoc);
+        for(CorefChain chain : document.corefChains().values()){
+            System.out.println(chain);
+        }
+
+        for (CoreMap sentence : annotationDoc.get(CoreAnnotations.SentencesAnnotation.class)){
+            System.out.println("--- mentions ----");
+            for(Mention m : sentence.get(CorefCoreAnnotations.CorefMentionsAnnotation.class)){
+                System.out.println(m);
+            }
+        }
+
+        *//*  Constituency Parse  *//*
+        Tree cParse = sentenceList.get(0).constituencyParse();
+        System.out.println("\n");
+        System.out.println("--- Constituence Parse ---");
+        System.out.println(cParse);
+
+
+        *//*  Dependency Parse  *//*
+        SemanticGraph dParse = sentenceList.get(0).dependencyParse();
+        System.out.println("\n");
+        System.out.println("--- Dependency Parse ---");
+        System.out.println(dParse);
