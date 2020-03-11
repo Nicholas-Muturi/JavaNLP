@@ -1,0 +1,83 @@
+package models;
+
+import edu.stanford.nlp.ling.CoreLabel;
+import org.apache.commons.text.similarity.CosineSimilarity;
+
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class DocumentParser {
+    private List<List<String>> docTermsArray = new ArrayList<>();
+    private Set<String> bagOfWords = new HashSet<>();
+    private List<List<Double>> tfidfDocsVector = new ArrayList<>();
+    static Stanford_NLP pipeline;
+
+    public void parseFiles(String filePath) throws FileNotFoundException, IOException {
+        pipeline = new Stanford_NLP();
+        File stopwordsFile = new File("src/main/resources/stopwords.txt");
+        File[] allfiles = new File(filePath).listFiles();
+        Scanner reader = null;
+
+        assert allfiles != null;
+        for(File f : allfiles){
+            if(f.getName().endsWith(".txt")){
+                reader = new Scanner(f);
+                StringBuilder sb = new StringBuilder();
+                String s = null;
+
+                while((reader.hasNextLine())){
+                    sb.append(reader.nextLine());
+                    sb.append(" ");
+                }
+
+                String sbToString = sb.toString();
+                pipeline.annotate(sbToString);
+                for(CoreLabel term : pipeline.getTokens()){
+                    bagOfWords.add(term.word());
+                }
+                docTermsArray.add(pipeline.getTokens().stream().map(CoreLabel::word).collect(Collectors.toList()));
+
+            }
+        }
+        reader = new Scanner(stopwordsFile);
+        List<String> stopWords = new ArrayList<>();
+        while(reader.hasNextLine()){
+            stopWords.add(reader.nextLine());
+        }
+        bagOfWords.removeAll(stopWords);
+    }
+
+    public void tfIdfCalc(){
+        for(List<String> docTerms : docTermsArray ){
+            double tf;
+            double idf;
+            double tfidf;
+            List<Double> tfidfVectors = new ArrayList<>();
+            for(String term : bagOfWords){
+                tf = new TFIDFCalculator().tf(docTerms,term);
+                idf = new TFIDFCalculator().idf(docTermsArray,term);
+                tfidf = tf * idf;
+                tfidfVectors.add(tfidf);
+            }
+            tfidfDocsVector.add(tfidfVectors);
+        }
+        System.out.println(docTermsArray);
+        System.out.println(tfidfDocsVector);
+    }
+
+    // Method to calculate cosine similarity between all the documents.
+        public void getCosineSimilarity()
+        {
+            for (int i = 0; i < tfidfDocsVector.size(); i++)
+            {
+                for (int j = 0; j < tfidfDocsVector.size(); j++)
+                {
+    	            if(i!=j)
+    	                System.out.println("between " + i + " and " + j + "  =  "+ new CosineSimilarity().cosineSimilarity (tfidfDocsVector.get(i),  tfidfDocsVector.get(j)));
+                }
+            }
+        }
+
+
+}
