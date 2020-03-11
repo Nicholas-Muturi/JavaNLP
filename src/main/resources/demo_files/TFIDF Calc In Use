@@ -1,0 +1,40 @@
+        String docA = "What is your name?";
+        String docB = "Is the corona virus in Kenya?";
+        String docC = "we obtain this measure by dividing the total number of documents by the number of documents containing the term, and then taking the logarithm of that quotient";
+
+        pipeline.annotate(docA);
+        List<String> docAWords = pipeline.getTokens().stream().map(CoreLabel::word).collect(Collectors.toList());
+
+        pipeline.annotate(docB);
+        List<String> docBWords = pipeline.getTokens().stream().map(CoreLabel::word).collect(Collectors.toList());
+
+        pipeline.annotate(docC);
+        List<String> docCWords = pipeline.getTokens().stream().map(CoreLabel::word).collect(Collectors.toList());
+        List<List<String>> documents = Arrays.asList(docAWords,docBWords,docCWords);
+
+        List<String> stopWords = new ArrayList<>();
+        try {
+            File stopwordsFile = new File("src/main/resources/stopwords.txt");
+            Scanner reader = new Scanner(stopwordsFile);
+            while (reader.hasNextLine()){
+                stopWords.add(reader.nextLine());
+            }
+            reader.close();
+        } catch (FileNotFoundException ex){
+            System.out.println("An error occured: "+ex);
+        }
+
+        //Bag of words
+        Set<String> bagOfWords = new HashSet<>(docAWords);
+        bagOfWords.addAll(docBWords);
+        bagOfWords.addAll(docCWords);
+        bagOfWords.removeAll(stopWords); //cleans bag of words
+        System.out.println(bagOfWords);
+
+        TFIDFCalculator tfidfCalculator = new TFIDFCalculator();
+
+        for(int i = 0; i<documents.size(); i++){
+            double tfScore = tfidfCalculator.tfIdf(documents.get(i), documents, "virus");
+            System.out.println("Doc #"+ (i+1) + " : " + " - " + tfScore);
+        }
+        System.out.println("-------------------");

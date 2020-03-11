@@ -1,0 +1,13 @@
+static String textDelimiter = " ";
+static String documentA = "i like football";
+static String documentB = "i hate margaret";
+
+CosineSimilarity documentsSimilarity = new CosineSimilarity();
+
+Map<CharSequence, Integer> vectorA = Arrays.stream(documentA.split(textDelimiter))
+    .collect(Collectors.toMap(character -> character, character -> 1, Integer::sum));
+Map<CharSequence, Integer> vectorB = Arrays.stream(documentB.split(textDelimiter))
+    .collect(Collectors.toMap(character -> character, character -> 1, Integer::sum));
+
+Double docABCosSimilarity = documentsSimilarity.cosineSimilarity(vectorA, vectorB);
+System.out.printf("%4.3f\n", docABCosSimilarity);
